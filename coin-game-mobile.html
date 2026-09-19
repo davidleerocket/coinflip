@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Coin Bet</title>
+<style>
+* { box-sizing: border-box; }
+html, body {
+    margin: 0;
+    min-height: 100%;
+    background: #111;
+}
+body {
+    font-family: Arial, sans-serif;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: max(20px, env(safe-area-inset-top))
+             max(20px, env(safe-area-inset-right))
+             max(20px, env(safe-area-inset-bottom))
+             max(20px, env(safe-area-inset-left));
+    -webkit-tap-highlight-color: transparent;
+}
+.game {
+    text-align: center;
+    width: 100%;
+    max-width: 350px;
+}
+h1 { margin: 0 0 5px; font-size: 28px; }
+#money {
+    font-size: 42px;
+    font-weight: bold;
+    margin: 20px 0;
+}
+#coin {
+    font-size: clamp(42px, 13vw, 58px);
+    font-weight: bold;
+    margin: 35px 0;
+    min-height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.choice {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    margin-bottom: 14px;
+}
+button {
+    font-family: inherit;
+    font-size: 18px;
+    font-weight: bold;
+    min-height: 52px;
+    border: 2px solid #777;
+    background: #222;
+    color: white;
+    cursor: pointer;
+    border-radius: 8px;
+    touch-action: manipulation;
+}
+.choice button { flex: 1; }
+button.selected {
+    background: white;
+    color: black;
+    border-color: white;
+}
+input {
+    display: block;
+    width: 100%;
+    height: 54px;
+    padding: 10px;
+    font-size: 22px;
+    text-align: center;
+    border-radius: 8px;
+    border: none;
+    outline: none;
+    margin-bottom: 10px;
+}
+#flipButton {
+    width: 100%;
+    background: white;
+    color: black;
+    border-color: white;
+}
+#flipButton:active { transform: scale(0.98); }
+#result {
+    min-height: 30px;
+    margin-top: 20px;
+    font-size: 20px;
+    font-weight: bold;
+}
+.hint {
+    margin-top: 10px;
+    color: #888;
+    font-size: 14px;
+}
+</style>
+</head>
+<body>
+<div class="game">
+    <h1>Coin Bet</h1>
+    <div id="money">$1.00</div>
+    <div id="coin">?</div>
+
+    <div class="choice">
+        <button id="heads" class="selected" onclick="selectSide('heads')">HEADS</button>
+        <button id="tails" onclick="selectSide('tails')">TAILS</button>
+    </div>
+
+    <input id="bet" type="number" min="0.01" step="0.01"
+           inputmode="decimal" placeholder="Bet amount">
+
+    <button id="flipButton" onclick="flipCoin()">FLIP</button>
+
+    <div id="result"></div>
+    <div class="hint">Enter your bet → FLIP</div>
+</div>
+
+<script>
+let money = 1.00;
+let selectedSide = "heads";
+
+const moneyDisplay = document.getElementById("money");
+const coinDisplay = document.getElementById("coin");
+const resultDisplay = document.getElementById("result");
+const betInput = document.getElementById("bet");
+const flipButton = document.getElementById("flipButton");
+
+function selectSide(side) {
+    selectedSide = side;
+    document.getElementById("heads").classList.remove("selected");
+    document.getElementById("tails").classList.remove("selected");
+    document.getElementById(side).classList.add("selected");
+}
+
+function flipCoin() {
+    let bet = parseFloat(betInput.value);
+
+    if (isNaN(bet) || bet <= 0) {
+        resultDisplay.textContent = "Enter a valid bet.";
+        return;
+    }
+
+    if (bet > money) {
+        resultDisplay.textContent = "You don't have enough money.";
+        return;
+    }
+
+    const outcome = Math.random() < 0.5 ? "heads" : "tails";
+    coinDisplay.textContent = outcome.toUpperCase();
+
+    if (outcome === selectedSide) {
+        money += bet;
+        resultDisplay.textContent = "WIN  +$" + bet.toFixed(2);
+    } else {
+        money -= bet;
+        resultDisplay.textContent = "LOSS  -$" + bet.toFixed(2);
+    }
+
+    money = Math.round(money * 100) / 100;
+    moneyDisplay.textContent = "$" + money.toFixed(2);
+
+    if (money <= 0) {
+        resultDisplay.textContent = "BROKE — reload to restart";
+        betInput.disabled = true;
+        flipButton.disabled = true;
+    }
+}
+
+betInput.addEventListener("keydown", function(event) {
+    if (event.key === "Enter") {
+        event.preventDefault();
+        flipCoin();
+    }
+});
+</script>
+</body>
+</html>
