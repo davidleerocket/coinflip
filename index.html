@@ -36,12 +36,58 @@ h1 { margin: 0 0 5px; font-size: 28px; }
 #money {
     font-size: 42px;
     font-weight: bold;
-    margin: 20px 0;
+    margin: 20px 0 12px;
+}
+.balance-panel {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 16px;
+    background: #181818;
+    border: 1px solid #333;
+    border-radius: 10px;
+    text-align: left;
+}
+.panel-label {
+    color: #888;
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+}
+#balanceChart {
+    display: block;
+    width: 100%;
+    height: 120px;
+}
+.flip-history {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 30px;
+    overflow: hidden;
+}
+.flip-chip {
+    flex: 1 1 0;
+    min-width: 0;
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
+    color: white;
+}
+.flip-chip.heads { background: #178c4b; }
+.flip-chip.tails { background: #b83a3a; }
+.history-empty {
+    color: #666;
+    font-size: 13px;
 }
 #coin {
     font-size: clamp(42px, 13vw, 58px);
     font-weight: bold;
-    margin: 35px 0;
+    margin: 22px 0;
     min-height: 70px;
     display: flex;
     align-items: center;
@@ -101,12 +147,32 @@ input {
     color: #888;
     font-size: 14px;
 }
+@media (max-height: 740px) {
+    body { padding-top: 12px; padding-bottom: 12px; }
+    #money { margin-top: 10px; }
+    #balanceChart { height: 95px; }
+    #coin { margin: 12px 0; min-height: 55px; }
+    #result { margin-top: 12px; }
+}
 </style>
 </head>
 <body>
 <div class="game">
     <h1>Coin Bet</h1>
     <div id="money">$1.00</div>
+
+    <div class="balance-panel">
+        <div class="panel-label">BALANCE HISTORY</div>
+        <canvas id="balanceChart" aria-label="Balance history chart"></canvas>
+    </div>
+
+    <div class="balance-panel">
+        <div class="panel-label">LAST 10 FLIPS</div>
+        <div id="flipHistory" class="flip-history">
+            <span class="history-empty">No flips yet</span>
+        </div>
+    </div>
+
     <div id="coin">?</div>
 
     <div class="choice">
@@ -126,18 +192,120 @@ input {
 <script>
 let money = 1.00;
 let selectedSide = "heads";
+let flipHistory = [];
+let balanceHistory = [money];
 
 const moneyDisplay = document.getElementById("money");
 const coinDisplay = document.getElementById("coin");
 const resultDisplay = document.getElementById("result");
 const betInput = document.getElementById("bet");
 const flipButton = document.getElementById("flipButton");
+const flipHistoryDisplay = document.getElementById("flipHistory");
+const balanceChart = document.getElementById("balanceChart");
 
 function selectSide(side) {
     selectedSide = side;
     document.getElementById("heads").classList.remove("selected");
     document.getElementById("tails").classList.remove("selected");
     document.getElementById(side).classList.add("selected");
+}
+
+function updateFlipHistory() {
+    if (flipHistory.length === 0) {
+        flipHistoryDisplay.innerHTML = '<span class="history-empty">No flips yet</span>';
+        return;
+    }
+
+    flipHistoryDisplay.innerHTML = flipHistory.slice(-10).map(outcome => {
+        const letter = outcome === "heads" ? "H" : "T";
+        return `<span class="flip-chip ${outcome}">${letter}</span>`;
+    }).join("");
+}
+
+function drawBalanceChart() {
+    const rect = balanceChart.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    balanceChart.width = Math.round(rect.width * dpr);
+    balanceChart.height = Math.round(rect.height * dpr);
+
+    const ctx = balanceChart.getContext("2d");
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const width = rect.width;
+    const height = rect.height;
+    const pad = { top: 8, right: 6, bottom: 8, left: 6 };
+    const values = balanceHistory;
+    let minValue = Math.min(...values);
+    let maxValue = Math.max(...values);
+
+    if (minValue === maxValue) {
+        const cushion = Math.max(0.05, Math.abs(minValue) * 0.1);
+        minValue -= cushion;
+        maxValue += cushion;
+    } else {
+        const cushion = (maxValue - minValue) * 0.12;
+        minValue -= cushion;
+        maxValue += cushion;
+    }
+
+    const x = i => pad.left + (values.length === 1 ? 0 : i / (values.length - 1)) * (width - pad.left - pad.right);
+    const y = value => pad.top + (maxValue - value) / (maxValue - minValue) * (height - pad.top - pad.bottom);
+
+    ctx.clearRect(0, 0, width, height);
+
+    ctx.strokeStyle = "#2b2b2b";
+    ctx.lineWidth = 1;
+    for (let i = 1; i <= 3; i++) {
+        const gy = pad.top + (height - pad.top - pad.bottom) * i / 4;
+        ctx.beginPath();
+        ctx.moveTo(pad.left, gy);
+        ctx.lineTo(width - pad.right, gy);
+        ctx.stroke();
+    }
+
+    const positive = values[values.length - 1] >= values[0];
+    const lineColor = positive ? "#33c875" : "#e05252";
+
+    const gradient = ctx.createLinearGradient(0, pad.top, 0, height - pad.bottom);
+    gradient.addColorStop(0, positive ? "rgba(51, 200, 117, 0.28)" : "rgba(224, 82, 82, 0.28)");
+    gradient.addColorStop(1, positive ? "rgba(51, 200, 117, 0.01)" : "rgba(224, 82, 82, 0.01)");
+
+    ctx.beginPath();
+    values.forEach((value, i) => {
+        const px = x(i);
+        const py = y(value);
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+    });
+    if (values.length === 1) ctx.lineTo(width - pad.right, y(values[0]));
+    ctx.lineTo(width - pad.right, height - pad.bottom);
+    ctx.lineTo(pad.left, height - pad.bottom);
+    ctx.closePath();
+    ctx.fillStyle = gradient;
+    ctx.fill();
+
+    ctx.beginPath();
+    values.forEach((value, i) => {
+        const px = x(i);
+        const py = y(value);
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+    });
+    if (values.length === 1) ctx.lineTo(width - pad.right, y(values[0]));
+    ctx.strokeStyle = lineColor;
+    ctx.lineWidth = 2.5;
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
+    ctx.stroke();
+
+    const lastX = values.length === 1 ? width - pad.right : x(values.length - 1);
+    const lastY = y(values[values.length - 1]);
+    ctx.beginPath();
+    ctx.arc(lastX, lastY, 3.5, 0, Math.PI * 2);
+    ctx.fillStyle = lineColor;
+    ctx.fill();
 }
 
 function flipCoin() {
@@ -155,6 +323,8 @@ function flipCoin() {
 
     const outcome = Math.random() < 0.5 ? "heads" : "tails";
     coinDisplay.textContent = outcome.toUpperCase();
+    flipHistory.push(outcome);
+    updateFlipHistory();
 
     if (outcome === selectedSide) {
         money += bet;
@@ -166,6 +336,8 @@ function flipCoin() {
 
     money = Math.round(money * 100) / 100;
     moneyDisplay.textContent = "$" + money.toFixed(2);
+    balanceHistory.push(money);
+    drawBalanceChart();
 
     if (money <= 0) {
         resultDisplay.textContent = "BROKE — reload to restart";
@@ -173,6 +345,9 @@ function flipCoin() {
         flipButton.disabled = true;
     }
 }
+
+window.addEventListener("resize", drawBalanceChart);
+drawBalanceChart();
 
 betInput.addEventListener("keydown", function(event) {
     if (event.key === "Enter") {
