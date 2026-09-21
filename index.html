@@ -18,7 +18,7 @@ body {
     color: white;
     display: flex;
     justify-content: center;
-    align-items: flex-start;
+    align-items: center;
     min-height: 100vh;
     min-height: 100dvh;
     padding: max(20px, env(safe-area-inset-top))
@@ -27,27 +27,17 @@ body {
              max(20px, env(safe-area-inset-left));
     -webkit-tap-highlight-color: transparent;
 }
-
 .game {
     text-align: center;
     width: 100%;
     max-width: 350px;
 }
-
 h1 { margin: 0 0 5px; font-size: 28px; }
-.cash-label {
-    color: #888;
-    font-size: 11px;
-    font-weight: bold;
-    letter-spacing: 0.08em;
-    margin-top: 13px;
-}
 #money {
     font-size: 42px;
     font-weight: bold;
-    margin: 3px 0 12px;
+    margin: 20px 0 12px;
 }
-
 .balance-panel {
     width: 100%;
     padding: 12px;
@@ -57,7 +47,6 @@ h1 { margin: 0 0 5px; font-size: 28px; }
     border-radius: 10px;
     text-align: left;
 }
-
 .panel-label {
     color: #888;
     font-size: 11px;
@@ -65,24 +54,11 @@ h1 { margin: 0 0 5px; font-size: 28px; }
     letter-spacing: 0.08em;
     margin-bottom: 8px;
 }
-
-.chart-header {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 10px;
-}
-#netWorth {
-    font-size: 15px;
-    font-weight: bold;
-}
-
 #balanceChart {
     display: block;
     width: 100%;
     height: 120px;
 }
-
 .flip-history {
     display: flex;
     align-items: center;
@@ -90,7 +66,6 @@ h1 { margin: 0 0 5px; font-size: 28px; }
     min-height: 30px;
     overflow: hidden;
 }
-
 .flip-chip {
     flex: 1 1 0;
     min-width: 0;
@@ -103,14 +78,12 @@ h1 { margin: 0 0 5px; font-size: 28px; }
     font-weight: bold;
     color: white;
 }
-
 .flip-chip.heads { background: #178c4b; }
 .flip-chip.tails { background: #b83a3a; }
 .history-empty {
     color: #666;
     font-size: 13px;
 }
-
 #coin {
     font-size: clamp(42px, 13vw, 58px);
     font-weight: bold;
@@ -120,14 +93,12 @@ h1 { margin: 0 0 5px; font-size: 28px; }
     align-items: center;
     justify-content: center;
 }
-
 .choice {
     display: flex;
     gap: 10px;
     width: 100%;
     margin-bottom: 14px;
 }
-
 button {
     font-family: inherit;
     font-size: 18px;
@@ -140,18 +111,12 @@ button {
     border-radius: 8px;
     touch-action: manipulation;
 }
-
 .choice button { flex: 1; }
 button.selected {
     background: white;
     color: black;
     border-color: white;
 }
-button:disabled {
-    opacity: 0.45;
-    cursor: default;
-}
-
 input {
     display: block;
     width: 100%;
@@ -164,14 +129,12 @@ input {
     outline: none;
     margin-bottom: 10px;
 }
-
 #flipButton {
     width: 100%;
     background: white;
     color: black;
     border-color: white;
 }
-
 #flipButton:active { transform: scale(0.98); }
 #result {
     min-height: 30px;
@@ -179,129 +142,14 @@ input {
     font-size: 20px;
     font-weight: bold;
 }
-
 .hint {
     margin-top: 10px;
     color: #888;
     font-size: 14px;
 }
-
-.investments {
-    margin-top: 24px;
-    padding-top: 20px;
-    border-top: 1px solid #2c2c2c;
-    text-align: left;
-}
-.investments-title-row {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 10px;
-}
-.investments-title {
-    font-size: 20px;
-    font-weight: bold;
-}
-.investments-subtitle {
-    color: #777;
-    font-size: 11px;
-    text-align: right;
-}
-
-.investment-card {
-    background: #181818;
-    border: 1px solid #333;
-    border-radius: 10px;
-    padding: 12px;
-    margin-bottom: 12px;
-}
-.investment-top {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 12px;
-}
-.investment-name {
-    font-size: 16px;
-    font-weight: bold;
-}
-.investment-desc {
-    color: #888;
-    font-size: 11px;
-    line-height: 1.35;
-    margin-top: 3px;
-}
-.market-return {
-    font-size: 15px;
-    font-weight: bold;
-    white-space: nowrap;
-}
-.market-return.up { color: #33c875; }
-.market-return.down { color: #e05252; }
-.market-return.flat { color: #999; }
-
-.investment-stats {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 7px;
-    margin: 11px 0 10px;
-}
-.stat {
-    min-width: 0;
-}
-.stat-label {
-    color: #666;
-    font-size: 9px;
-    font-weight: bold;
-    letter-spacing: 0.05em;
-    margin-bottom: 2px;
-}
-.stat-value {
-    font-size: 13px;
-    font-weight: bold;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.investment-input {
-    height: 42px;
-    font-size: 17px;
-    margin-bottom: 7px;
-    background: #f5f5f5;
-}
-.investment-actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr auto;
-    gap: 7px;
-}
-.investment-actions button {
-    min-height: 40px;
-    font-size: 12px;
-    border-width: 1px;
-    border-color: #555;
-    border-radius: 7px;
-}
-.investment-actions .deposit {
-    background: white;
-    color: black;
-    border-color: white;
-}
-.investment-actions .all {
-    padding: 0 11px;
-    color: #bbb;
-}
-.investment-message {
-    min-height: 16px;
-    margin-top: 7px;
-    color: #888;
-    font-size: 11px;
-}
-
 @media (max-height: 740px) {
     body { padding-top: 12px; padding-bottom: 12px; }
-    #money { margin-bottom: 9px; }
+    #money { margin-top: 10px; }
     #balanceChart { height: 95px; }
     #coin { margin: 12px 0; min-height: 55px; }
     #result { margin-top: 12px; }
@@ -311,15 +159,11 @@ input {
 <body>
 <div class="game">
     <h1>Coin Bet</h1>
-    <div class="cash-label">CASH AVAILABLE</div>
     <div id="money">$1.00</div>
 
     <div class="balance-panel">
-        <div class="chart-header">
-            <div class="panel-label">TOTAL BALANCE HISTORY</div>
-            <div id="netWorth">$1.00</div>
-        </div>
-        <canvas id="balanceChart" aria-label="Total balance history chart"></canvas>
+        <div class="panel-label">BALANCE HISTORY</div>
+        <canvas id="balanceChart" aria-label="Balance history chart"></canvas>
     </div>
 
     <div class="balance-panel">
@@ -343,79 +187,6 @@ input {
 
     <div id="result"></div>
     <div class="hint">Enter your bet → FLIP</div>
-
-    <div class="investments">
-        <div class="investments-title-row">
-            <div class="investments-title">Invest</div>
-            <div class="investments-subtitle">Markets move every second</div>
-        </div>
-
-        <div class="investment-card" id="fixedCard">
-            <div class="investment-top">
-                <div>
-                    <div class="investment-name">Fixed Income</div>
-                    <div class="investment-desc">Guaranteed +0.5% / sec · $2 minimum</div>
-                </div>
-                <div id="fixedReturn" class="market-return up">+0.50%</div>
-            </div>
-            <div class="investment-stats">
-                <div class="stat"><div class="stat-label">POSITION</div><div id="fixedValue" class="stat-value">$0.00</div></div>
-                <div class="stat"><div class="stat-label">MARKET</div><div id="fixedPrice" class="stat-value">$1.0000</div></div>
-                <div class="stat"><div class="stat-label">P/L</div><div id="fixedPL" class="stat-value">$0.00</div></div>
-            </div>
-            <input id="fixedInput" class="investment-input" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="Dollar amount">
-            <div class="investment-actions">
-                <button class="deposit" onclick="deposit('fixed')">DEPOSIT</button>
-                <button onclick="withdraw('fixed')">WITHDRAW</button>
-                <button class="all" onclick="withdrawAll('fixed')">ALL</button>
-            </div>
-            <div id="fixedMessage" class="investment-message"></div>
-        </div>
-
-        <div class="investment-card" id="conservativeCard">
-            <div class="investment-top">
-                <div>
-                    <div class="investment-name">Conservative</div>
-                    <div class="investment-desc">Targets ~2% / sec with moderate variance · $5 minimum</div>
-                </div>
-                <div id="conservativeReturn" class="market-return flat">0.00%</div>
-            </div>
-            <div class="investment-stats">
-                <div class="stat"><div class="stat-label">POSITION</div><div id="conservativeValue" class="stat-value">$0.00</div></div>
-                <div class="stat"><div class="stat-label">MARKET</div><div id="conservativePrice" class="stat-value">$1.0000</div></div>
-                <div class="stat"><div class="stat-label">P/L</div><div id="conservativePL" class="stat-value">$0.00</div></div>
-            </div>
-            <input id="conservativeInput" class="investment-input" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="Dollar amount">
-            <div class="investment-actions">
-                <button class="deposit" onclick="deposit('conservative')">DEPOSIT</button>
-                <button onclick="withdraw('conservative')">WITHDRAW</button>
-                <button class="all" onclick="withdrawAll('conservative')">ALL</button>
-            </div>
-            <div id="conservativeMessage" class="investment-message"></div>
-        </div>
-
-        <div class="investment-card" id="speculativeCard">
-            <div class="investment-top">
-                <div>
-                    <div class="investment-name">Speculative</div>
-                    <div class="investment-desc">Wild swings up to ±10% / sec · $10 minimum</div>
-                </div>
-                <div id="speculativeReturn" class="market-return flat">0.00%</div>
-            </div>
-            <div class="investment-stats">
-                <div class="stat"><div class="stat-label">POSITION</div><div id="speculativeValue" class="stat-value">$0.00</div></div>
-                <div class="stat"><div class="stat-label">MARKET</div><div id="speculativePrice" class="stat-value">$1.0000</div></div>
-                <div class="stat"><div class="stat-label">P/L</div><div id="speculativePL" class="stat-value">$0.00</div></div>
-            </div>
-            <input id="speculativeInput" class="investment-input" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="Dollar amount">
-            <div class="investment-actions">
-                <button class="deposit" onclick="deposit('speculative')">DEPOSIT</button>
-                <button onclick="withdraw('speculative')">WITHDRAW</button>
-                <button class="all" onclick="withdrawAll('speculative')">ALL</button>
-            </div>
-            <div id="speculativeMessage" class="investment-message"></div>
-        </div>
-    </div>
 </div>
 
 <script>
@@ -424,32 +195,7 @@ let selectedSide = "heads";
 let flipHistory = [];
 let balanceHistory = [money];
 
-const markets = {
-    fixed: {
-        min: 2,
-        price: 1,
-        units: 0,
-        costBasis: 0,
-        lastReturn: 0.005
-    },
-    conservative: {
-        min: 5,
-        price: 1,
-        units: 0,
-        costBasis: 0,
-        lastReturn: 0
-    },
-    speculative: {
-        min: 10,
-        price: 1,
-        units: 0,
-        costBasis: 0,
-        lastReturn: 0
-    }
-};
-
 const moneyDisplay = document.getElementById("money");
-const netWorthDisplay = document.getElementById("netWorth");
 const coinDisplay = document.getElementById("coin");
 const resultDisplay = document.getElementById("result");
 const betInput = document.getElementById("bet");
@@ -464,19 +210,6 @@ function selectSide(side) {
     document.getElementById(side).classList.add("selected");
 }
 
-function moneyText(value) {
-    return "$" + value.toFixed(2);
-}
-
-function getPositionValue(key) {
-    const market = markets[key];
-    return market.units * market.price;
-}
-
-function getNetWorth() {
-    return money + getPositionValue("fixed") + getPositionValue("conservative") + getPositionValue("speculative");
-}
-
 function updateFlipHistory() {
     if (flipHistory.length === 0) {
         flipHistoryDisplay.innerHTML = '<span class="history-empty">No flips yet</span>';
@@ -487,162 +220,6 @@ function updateFlipHistory() {
         const letter = outcome === "heads" ? "H" : "T";
         return `<span class="flip-chip ${outcome}">${letter}</span>`;
     }).join("");
-}
-
-function updateCashDisplay() {
-    moneyDisplay.textContent = moneyText(money);
-    flipButton.disabled = money < 0.01;
-}
-
-function setReturnDisplay(key) {
-    const el = document.getElementById(key + "Return");
-    const pct = markets[key].lastReturn * 100;
-    el.textContent = (pct >= 0 ? "+" : "") + pct.toFixed(2) + "%";
-    el.classList.remove("up", "down", "flat");
-    if (pct > 0.0001) el.classList.add("up");
-    else if (pct < -0.0001) el.classList.add("down");
-    else el.classList.add("flat");
-}
-
-function updateInvestmentDisplay(key) {
-    const market = markets[key];
-    const value = getPositionValue(key);
-    const pl = value - market.costBasis;
-
-    document.getElementById(key + "Value").textContent = moneyText(value);
-    document.getElementById(key + "Price").textContent = "$" + market.price.toFixed(4);
-
-    const plEl = document.getElementById(key + "PL");
-    plEl.textContent = (pl > 0 ? "+" : "") + moneyText(pl);
-    plEl.style.color = pl > 0.004 ? "#33c875" : pl < -0.004 ? "#e05252" : "white";
-
-    setReturnDisplay(key);
-}
-
-function updateAllDisplays() {
-    updateCashDisplay();
-    updateInvestmentDisplay("fixed");
-    updateInvestmentDisplay("conservative");
-    updateInvestmentDisplay("speculative");
-    netWorthDisplay.textContent = moneyText(getNetWorth());
-}
-
-function showInvestmentMessage(key, message) {
-    document.getElementById(key + "Message").textContent = message;
-}
-
-function deposit(key) {
-    const market = markets[key];
-    const input = document.getElementById(key + "Input");
-    const amount = parseFloat(input.value);
-
-    if (isNaN(amount) || amount <= 0) {
-        showInvestmentMessage(key, "Enter a valid amount.");
-        return;
-    }
-    if (amount < market.min) {
-        showInvestmentMessage(key, "Minimum deposit is " + moneyText(market.min) + ".");
-        return;
-    }
-    if (amount > money + 0.000001) {
-        showInvestmentMessage(key, "Not enough cash available.");
-        return;
-    }
-
-    money -= amount;
-    if (Math.abs(money) < 0.000001) money = 0;
-    market.units += amount / market.price;
-    market.costBasis += amount;
-
-    input.value = "";
-    showInvestmentMessage(key, "Deposited " + moneyText(amount) + ".");
-    recordBalancePoint();
-    updateAllDisplays();
-}
-
-function withdraw(key) {
-    const market = markets[key];
-    const input = document.getElementById(key + "Input");
-    const amount = parseFloat(input.value);
-    const value = getPositionValue(key);
-
-    if (isNaN(amount) || amount <= 0) {
-        showInvestmentMessage(key, "Enter a valid amount.");
-        return;
-    }
-    if (amount > value + 0.005) {
-        showInvestmentMessage(key, "Position is only worth " + moneyText(value) + ".");
-        return;
-    }
-
-    const actualAmount = Math.min(amount, value);
-    const fractionSold = value > 0 ? actualAmount / value : 0;
-    const unitsSold = market.units * fractionSold;
-    const basisRemoved = market.costBasis * fractionSold;
-
-    market.units -= unitsSold;
-    market.costBasis -= basisRemoved;
-    money += actualAmount;
-
-    if (market.units < 0.000000001 || getPositionValue(key) < 0.005) {
-        money += getPositionValue(key);
-        market.units = 0;
-        market.costBasis = 0;
-    }
-
-    input.value = "";
-    showInvestmentMessage(key, "Withdrew " + moneyText(actualAmount) + ".");
-    recordBalancePoint();
-    updateAllDisplays();
-}
-
-function withdrawAll(key) {
-    const market = markets[key];
-    const value = getPositionValue(key);
-
-    if (value <= 0) {
-        showInvestmentMessage(key, "No position to withdraw.");
-        return;
-    }
-
-    money += value;
-    market.units = 0;
-    market.costBasis = 0;
-    document.getElementById(key + "Input").value = "";
-    showInvestmentMessage(key, "Withdrew " + moneyText(value) + ".");
-    recordBalancePoint();
-    updateAllDisplays();
-}
-
-function randomConservativeReturn() {
-    // Average is about +2% per second, but individual seconds can be negative.
-    return -0.03 + Math.random() * 0.10;
-}
-
-function randomSpeculativeReturn() {
-    // High-volatility market: bounded to a maximum 10% move in either direction.
-    // A slight positive drift keeps long-run upside possible without removing large drawdowns.
-    const shock = (Math.random() * 0.20) - 0.10;
-    const drift = 0.01;
-    return Math.max(-0.10, Math.min(0.10, shock + drift));
-}
-
-function marketTick() {
-    markets.fixed.lastReturn = 0.005;
-    markets.conservative.lastReturn = randomConservativeReturn();
-    markets.speculative.lastReturn = randomSpeculativeReturn();
-
-    markets.fixed.price *= (1 + markets.fixed.lastReturn);
-    markets.conservative.price *= (1 + markets.conservative.lastReturn);
-    markets.speculative.price *= (1 + markets.speculative.lastReturn);
-
-    updateAllDisplays();
-    recordBalancePoint();
-}
-
-function recordBalancePoint() {
-    balanceHistory.push(getNetWorth());
-    drawBalanceChart();
 }
 
 function drawBalanceChart() {
@@ -660,13 +237,8 @@ function drawBalanceChart() {
     const height = rect.height;
     const pad = { top: 8, right: 6, bottom: 8, left: 6 };
     const values = balanceHistory;
-
-    let minValue = values[0];
-    let maxValue = values[0];
-    for (let i = 1; i < values.length; i++) {
-        if (values[i] < minValue) minValue = values[i];
-        if (values[i] > maxValue) maxValue = values[i];
-    }
+    let minValue = Math.min(...values);
+    let maxValue = Math.max(...values);
 
     if (minValue === maxValue) {
         const cushion = Math.max(0.05, Math.abs(minValue) * 0.1);
@@ -744,10 +316,8 @@ function flipCoin() {
         return;
     }
 
-    if (bet > money + 0.000001) {
-        resultDisplay.textContent = money < 0.01
-            ? "No cash — withdraw from an investment."
-            : "You don't have enough cash.";
+    if (bet > money) {
+        resultDisplay.textContent = "You don't have enough money.";
         return;
     }
 
@@ -765,21 +335,19 @@ function flipCoin() {
     }
 
     money = Math.round(money * 100) / 100;
-    if (Math.abs(money) < 0.000001) money = 0;
-    updateAllDisplays();
-    recordBalancePoint();
+    moneyDisplay.textContent = "$" + money.toFixed(2);
+    balanceHistory.push(money);
+    drawBalanceChart();
 
-    if (money < 0.01 && getNetWorth() >= 0.01) {
-        resultDisplay.textContent += " · Withdraw funds to keep betting";
-    } else if (getNetWorth() < 0.01) {
+    if (money <= 0) {
         resultDisplay.textContent = "BROKE — reload to restart";
+        betInput.disabled = true;
+        flipButton.disabled = true;
     }
 }
 
 window.addEventListener("resize", drawBalanceChart);
-updateAllDisplays();
 drawBalanceChart();
-setInterval(marketTick, 1000);
 
 betInput.addEventListener("keydown", function(event) {
     if (event.key === "Enter") {
