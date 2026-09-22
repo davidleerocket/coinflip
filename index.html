@@ -117,25 +117,92 @@ button.selected {
     color: black;
     border-color: white;
 }
-input {
-    display: block;
+
+.bet-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
     width: 100%;
-    height: 54px;
-    padding: 10px;
-    font-size: 22px;
-    text-align: center;
+}
+.bet-control {
+    min-width: 0;
+    min-height: 68px;
+    padding: 8px 7px 7px;
+    border: 2px solid #777;
+    background: #222;
+    color: white;
     border-radius: 8px;
-    border: none;
-    outline: none;
-    margin-bottom: 10px;
+    cursor: pointer;
+    touch-action: manipulation;
+    user-select: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: transform 80ms ease, border-color 120ms ease, background 120ms ease;
 }
-#flipButton {
-    width: 100%;
-    background: white;
-    color: black;
+.bet-control:active { transform: scale(0.97); }
+.bet-control.active {
     border-color: white;
+    background: #2b2b2b;
 }
-#flipButton:active { transform: scale(0.98); }
+.bet-control.disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+.bet-label {
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 0.06em;
+    color: #aaa;
+    line-height: 1;
+    margin-bottom: 5px;
+}
+.bet-input-wrap {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1px;
+    font-size: 20px;
+    font-weight: bold;
+    line-height: 1;
+}
+.bet-dollar {
+    color: white;
+    pointer-events: none;
+}
+.bet-input {
+    width: 58px;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    height: 28px;
+    border: 0;
+    border-bottom: 1px solid #666;
+    border-radius: 0;
+    outline: none;
+    background: transparent;
+    color: white;
+    font: inherit;
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+    -moz-appearance: textfield;
+}
+.bet-input::-webkit-outer-spin-button,
+.bet-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+.bet-input:focus {
+    border-bottom-color: white;
+}
+.all-in-value {
+    font-size: 20px;
+    font-weight: bold;
+    line-height: 28px;
+}
 #result {
     min-height: 30px;
     margin-top: 20px;
@@ -145,7 +212,250 @@ input {
 .hint {
     margin-top: 10px;
     color: #888;
-    font-size: 14px;
+    font-size: 13px;
+    line-height: 1.35;
+}
+
+.milestone-row {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 14px;
+    width: min(520px, calc(100vw - 40px));
+    margin: 6px 0 12px;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.milestone-bound {
+    color: #3e3e3e;
+    font-size: clamp(28px, 7vw, 38px);
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    white-space: nowrap;
+    user-select: none;
+}
+
+.milestone-bound.left { text-align: right; }
+.milestone-bound.right { text-align: left; }
+
+#money {
+    margin: 0;
+    min-width: 132px;
+}
+
+.milestone-pop-layer {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 10010;
+}
+
+.milestone-pop {
+    position: relative;
+    padding: 20px 24px 18px;
+    border: 2px solid rgba(255,255,255,0.92);
+    border-radius: 16px;
+    background: rgba(18,18,18,0.94);
+    box-shadow: 0 18px 70px rgba(0,0,0,0.62), 0 0 36px rgba(66,232,135,0.18);
+    text-align: center;
+    opacity: 0;
+    transform: scale(0.68);
+    animation: milestone-hit 980ms cubic-bezier(.16,.9,.22,1) forwards;
+    will-change: transform, opacity;
+}
+
+.milestone-kicker {
+    color: #9dffbf;
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 0.16em;
+    margin-bottom: 4px;
+}
+
+.milestone-amount {
+    color: white;
+    font-size: clamp(46px, 14vw, 72px);
+    font-weight: 900;
+    letter-spacing: -0.05em;
+    line-height: 0.98;
+    text-shadow: 0 0 22px rgba(66,232,135,0.32);
+}
+
+.milestone-pop::before,
+.milestone-pop::after {
+    content: "";
+    position: absolute;
+    inset: 50% auto auto 50%;
+    width: 90px;
+    height: 90px;
+    border: 3px solid #42e887;
+    border-radius: 50%;
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.2);
+    animation: milestone-ring 700ms ease-out forwards;
+    z-index: -1;
+}
+
+.milestone-pop::after {
+    animation-delay: 90ms;
+}
+
+@keyframes milestone-hit {
+    0%   { opacity: 0; transform: scale(0.68); }
+    18%  { opacity: 1; transform: scale(1.14); }
+    34%  { opacity: 1; transform: scale(0.98); }
+    62%  { opacity: 1; transform: scale(1.02); }
+    100% { opacity: 0; transform: scale(1.08); }
+}
+
+@keyframes milestone-ring {
+    0%   { opacity: 0.85; transform: translate(-50%, -50%) scale(0.2); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(3.4); }
+}
+
+
+.bust-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.58);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    z-index: 10020;
+    transition: opacity 120ms ease, visibility 120ms ease;
+}
+
+.bust-overlay.show {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.bust-card {
+    width: min(310px, 100%);
+    padding: 24px 20px 20px;
+    border: 1px solid #555;
+    border-radius: 14px;
+    background: #181818;
+    box-shadow: 0 18px 60px rgba(0, 0, 0, 0.65);
+    text-align: center;
+    transform: scale(0.86);
+}
+
+.bust-overlay.show .bust-card {
+    animation: bust-in 230ms cubic-bezier(.16,.9,.25,1.15) both;
+}
+
+.bust-title {
+    color: #ff5d5d;
+    font-size: clamp(42px, 13vw, 58px);
+    line-height: 0.95;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    text-shadow: 0 0 18px rgba(255, 93, 93, 0.28);
+}
+
+.bust-hint {
+    margin: 10px 0 16px;
+    color: #aaa;
+    font-size: 13px;
+    line-height: 1.35;
+}
+
+#restartButton {
+    width: 100%;
+    min-height: 58px;
+    background: white;
+    color: black;
+    border-color: white;
+    font-size: 20px;
+}
+
+#restartButton:active {
+    transform: scale(0.97);
+}
+
+@keyframes bust-in {
+    0%   { opacity: 0; transform: scale(0.86); }
+    72%  { opacity: 1; transform: scale(1.035); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+.bet-pop-layer {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 9999;
+}
+.bet-pop {
+    --x: 0px;
+    --y: 36%;
+    position: absolute;
+    left: calc(50% + var(--x));
+    top: var(--y);
+    font-size: clamp(34px, 10vw, 50px);
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translate(-50%, 4px) scale(0.72);
+    animation: bet-pop 720ms cubic-bezier(.16,.88,.28,1) forwards;
+    will-change: transform, opacity;
+}
+.bet-pop.win {
+    color: #42e887;
+    text-shadow: 0 0 10px rgba(66, 232, 135, 0.35), 0 3px 18px rgba(0, 0, 0, 0.65);
+}
+.bet-pop.loss {
+    color: #ff5d5d;
+    text-shadow: 0 0 10px rgba(255, 93, 93, 0.30), 0 3px 18px rgba(0, 0, 0, 0.65);
+}
+.bet-pop::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 74px;
+    height: 74px;
+    border: 2px solid currentColor;
+    border-radius: 50%;
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.2);
+    animation: bet-ring 470ms cubic-bezier(.16,.8,.3,1) forwards;
+    z-index: -1;
+}
+@keyframes bet-pop {
+    0%   { opacity: 0; transform: translate(-50%, 5px) scale(0.72); }
+    16%  { opacity: 1; transform: translate(-50%, -7px) scale(1.12); }
+    34%  { opacity: 1; transform: translate(-50%, -13px) scale(1); }
+    70%  { opacity: 1; transform: translate(-50%, -34px) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -62px) scale(0.94); }
+}
+@keyframes bet-ring {
+    0%   { opacity: 0.7; transform: translate(-50%, -50%) scale(0.2); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(1.7); }
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .bet-control:hover { border-color: #aaa; }
+    .bet-control.active:hover { border-color: white; }
+}
+@media (max-width: 360px) {
+    .bet-row { gap: 6px; }
+    .bet-control { padding-left: 5px; padding-right: 5px; }
+    .bet-input, .bet-input-wrap, .all-in-value { font-size: 18px; }
+    .bet-input { width: 52px; }
 }
 @media (max-height: 740px) {
     body { padding-top: 12px; padding-bottom: 12px; }
@@ -154,12 +464,37 @@ input {
     #coin { margin: 12px 0; min-height: 55px; }
     #result { margin-top: 12px; }
 }
+@media (max-width: 430px) {
+    .milestone-row {
+        width: calc(100vw - 32px);
+        max-width: 390px;
+        gap: 9px;
+    }
+    .milestone-bound {
+        font-size: clamp(24px, 8vw, 32px);
+    }
+    #money {
+        min-width: 112px;
+        font-size: clamp(34px, 11vw, 42px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .bet-pop { animation-duration: 300ms; }
+    .bet-pop::before { display: none; }
+    .milestone-pop { animation-duration: 360ms; }
+    .milestone-pop::before, .milestone-pop::after { display: none; }
+}
 </style>
 </head>
 <body>
 <div class="game">
     <h1>Coin Bet</h1>
-    <div id="money">$1.00</div>
+    <div class="milestone-row" aria-label="Balance milestone progress">
+        <div id="milestoneLow" class="milestone-bound left">$0</div>
+        <div id="money">$1.00</div>
+        <div id="milestoneHigh" class="milestone-bound right">$10</div>
+    </div>
 
     <div class="balance-panel">
         <div class="panel-label">BALANCE HISTORY</div>
@@ -176,38 +511,209 @@ input {
     <div id="coin">?</div>
 
     <div class="choice">
-        <button id="heads" class="selected" onclick="selectSide('heads')">HEADS</button>
-        <button id="tails" onclick="selectSide('tails')">TAILS</button>
+        <button id="heads" class="selected" onclick="selectSide('heads', true)">HEADS</button>
+        <button id="tails" onclick="selectSide('tails', true)">TAILS</button>
     </div>
 
-    <input id="bet" type="number" min="0.01" step="0.01"
-           inputmode="decimal" placeholder="Bet amount">
+    <div class="bet-row" aria-label="Bet controls">
+        <div id="smallBetControl" class="bet-control active" data-bet="small">
+            <div class="bet-label">SMALL</div>
+            <div class="bet-input-wrap">
+                <span class="bet-dollar">$</span>
+                <input id="smallBet" class="bet-input" type="number" min="0.01" step="0.01" inputmode="decimal" value="0.10" aria-label="Small bet amount">
+            </div>
+        </div>
 
-    <button id="flipButton" onclick="flipCoin()">FLIP</button>
+        <div id="largeBetControl" class="bet-control" data-bet="large">
+            <div class="bet-label">LARGE</div>
+            <div class="bet-input-wrap">
+                <span class="bet-dollar">$</span>
+                <input id="largeBet" class="bet-input" type="number" min="0.01" step="0.01" inputmode="decimal" value="0.25" aria-label="Large bet amount">
+            </div>
+        </div>
+
+        <div id="allInControl" class="bet-control" data-bet="allin">
+            <div class="bet-label">ALL IN</div>
+            <div class="all-in-value">100%</div>
+        </div>
+    </div>
 
     <div id="result"></div>
-    <div class="hint">Enter your bet → FLIP</div>
+    <div class="hint">Tap a bet to flip • Desktop: TAB switches side, SPACE / ENTER repeats your active bet</div>
 </div>
+
+<div id="bustOverlay" class="bust-overlay" aria-hidden="true">
+    <div class="bust-card" role="dialog" aria-modal="true" aria-labelledby="bustTitle">
+        <div id="bustTitle" class="bust-title">BROKE</div>
+        <div class="bust-hint">Tap restart • Desktop: SPACE / ENTER</div>
+        <button id="restartButton" type="button">RESTART</button>
+    </div>
+</div>
+
+<div id="betPopLayer" class="bet-pop-layer" aria-hidden="true"></div>
+<div id="milestonePopLayer" class="milestone-pop-layer" aria-hidden="true"></div>
 
 <script>
 let money = 1.00;
 let selectedSide = "heads";
 let flipHistory = [];
 let balanceHistory = [money];
+let activeBet = "small";
+let lastMilestoneBracket = 0;
+
+/*
+CUSTOM SOUND EFFECTS
+Put these six files in a /sounds folder next to index.html in your GitHub repo.
+Relative paths are intentional so this works on both custom domains and
+GitHub project pages such as username.github.io/repository-name/.
+*/
+const SOUND_PATHS = {
+    win: "./sounds/bet-win.mp3",
+    loss: "./sounds/bet-loss.mp3",
+    milestone: "./sounds/milestone.mp3",
+    broke: "./sounds/broke.mp3",
+    switch: "./sounds/switch.mp3",
+    restart: "./sounds/restart.mp3"
+};
+
+// Easy per-effect volume tuning. Values range from 0.0 to 1.0.
+const SOUND_VOLUME = {
+    win: 0.80,
+    loss: 0.72,
+    milestone: 0.95,
+    broke: 0.90,
+    switch: 0.58,
+    restart: 0.78
+};
+
+// Small pools let fast repeated bets retrigger/overlap sounds instead of
+// waiting for the previous copy to finish.
+const SOUND_POOL_SIZE = 4;
+const soundPools = {};
+const soundPoolIndex = {};
+
+Object.entries(SOUND_PATHS).forEach(([name, path]) => {
+    soundPools[name] = Array.from({ length: SOUND_POOL_SIZE }, () => {
+        const audio = new Audio(path);
+        audio.preload = "auto";
+        audio.playsInline = true;
+        return audio;
+    });
+    soundPoolIndex[name] = 0;
+});
+
+function playSound(name) {
+    const pool = soundPools[name];
+    if (!pool) return;
+
+    const index = soundPoolIndex[name];
+    const audio = pool[index];
+    soundPoolIndex[name] = (index + 1) % pool.length;
+
+    audio.volume = SOUND_VOLUME[name] ?? 1;
+    audio.currentTime = 0;
+
+    const playback = audio.play();
+    if (playback && typeof playback.catch === "function") {
+        // Missing files or browser autoplay restrictions should never stop gameplay.
+        playback.catch(() => {});
+    }
+}
 
 const moneyDisplay = document.getElementById("money");
 const coinDisplay = document.getElementById("coin");
 const resultDisplay = document.getElementById("result");
-const betInput = document.getElementById("bet");
-const flipButton = document.getElementById("flipButton");
 const flipHistoryDisplay = document.getElementById("flipHistory");
 const balanceChart = document.getElementById("balanceChart");
+const smallBetInput = document.getElementById("smallBet");
+const largeBetInput = document.getElementById("largeBet");
+const betPopLayer = document.getElementById("betPopLayer");
+const milestonePopLayer = document.getElementById("milestonePopLayer");
+const milestoneLow = document.getElementById("milestoneLow");
+const milestoneHigh = document.getElementById("milestoneHigh");
+const bustOverlay = document.getElementById("bustOverlay");
+const restartButton = document.getElementById("restartButton");
+const betControls = {
+    small: document.getElementById("smallBetControl"),
+    large: document.getElementById("largeBetControl"),
+    allin: document.getElementById("allInControl")
+};
 
-function selectSide(side) {
+function formatMilestone(value) {
+    return "$" + value.toLocaleString("en-US", { maximumFractionDigits: 0 });
+}
+
+function getMilestoneBracket(value) {
+    if (value < 10) return 0;
+    return Math.floor(Math.log10(value));
+}
+
+function getMilestoneBounds(value) {
+    if (value < 10) return { low: 0, high: 10, bracket: 0 };
+    const bracket = getMilestoneBracket(value);
+    const low = 10 ** bracket;
+    const high = low * 10;
+    return { low, high, bracket };
+}
+
+function updateMilestones(value = money) {
+    const { low, high } = getMilestoneBounds(value);
+    milestoneLow.textContent = formatMilestone(low);
+    milestoneHigh.textContent = formatMilestone(high);
+}
+
+function showMilestonePopup(amount) {
+    playSound("milestone");
+
+    const popup = document.createElement("div");
+    popup.className = "milestone-pop";
+    popup.innerHTML = `<div class="milestone-kicker">MILESTONE</div><div class="milestone-amount">${formatMilestone(amount)}</div>`;
+    milestonePopLayer.appendChild(popup);
+    popup.addEventListener("animationend", event => {
+        if (event.animationName === "milestone-hit") popup.remove();
+    });
+}
+
+function checkMilestoneProgress(previousMoney, newMoney) {
+    updateMilestones(newMoney);
+
+    if (newMoney <= previousMoney) {
+        lastMilestoneBracket = getMilestoneBracket(newMoney);
+        return;
+    }
+
+    const previousBracket = getMilestoneBracket(previousMoney);
+    const newBracket = getMilestoneBracket(newMoney);
+
+    if (newBracket > previousBracket) {
+        const achieved = 10 ** newBracket;
+        showMilestonePopup(achieved);
+    }
+
+    lastMilestoneBracket = newBracket;
+}
+
+function selectSide(side, withSound = false) {
+    const changed = side !== selectedSide;
     selectedSide = side;
     document.getElementById("heads").classList.remove("selected");
     document.getElementById("tails").classList.remove("selected");
     document.getElementById(side).classList.add("selected");
+
+    if (withSound && changed) {
+        playSound("switch");
+    }
+}
+
+function toggleSide() {
+    selectSide(selectedSide === "heads" ? "tails" : "heads", true);
+}
+
+function setActiveBet(type) {
+    activeBet = type;
+    Object.entries(betControls).forEach(([name, control]) => {
+        control.classList.toggle("active", name === type);
+    });
 }
 
 function updateFlipHistory() {
@@ -308,25 +814,60 @@ function drawBalanceChart() {
     ctx.fill();
 }
 
-function flipCoin() {
-    let bet = parseFloat(betInput.value);
+function getBetAmount(type) {
+    if (type === "allin") return money;
 
+    const input = type === "small" ? smallBetInput : largeBetInput;
+    return parseFloat(input.value);
+}
+
+function showBetPopup(isWin, amount) {
+    const popup = document.createElement("div");
+    popup.className = "bet-pop " + (isWin ? "win" : "loss");
+    popup.textContent = (isWin ? "+$" : "-$") + amount.toFixed(2);
+
+    const chartRect = balanceChart.getBoundingClientRect();
+    const verticalJitter = (Math.random() * 0.18 - 0.09) * chartRect.height;
+    const popupY = chartRect.top + chartRect.height * 0.56 + verticalJitter;
+
+    popup.style.setProperty("--x", (Math.random() * 64 - 32).toFixed(1) + "px");
+    popup.style.setProperty("--y", popupY.toFixed(1) + "px");
+
+    betPopLayer.appendChild(popup);
+    popup.addEventListener("animationend", event => {
+        if (event.animationName === "bet-pop") popup.remove();
+    });
+}
+
+function setBrokeState() {
+    const broke = money <= 0;
+    Object.values(betControls).forEach(control => control.classList.toggle("disabled", broke));
+    bustOverlay.classList.toggle("show", broke);
+    bustOverlay.setAttribute("aria-hidden", broke ? "false" : "true");
+}
+
+function flipCoin(bet) {
     if (isNaN(bet) || bet <= 0) {
         resultDisplay.textContent = "Enter a valid bet.";
-        return;
+        return false;
     }
+
+    bet = Math.round(bet * 100) / 100;
 
     if (bet > money) {
         resultDisplay.textContent = "You don't have enough money.";
-        return;
+        return false;
     }
+
+    const previousMoney = money;
 
     const outcome = Math.random() < 0.5 ? "heads" : "tails";
     coinDisplay.textContent = outcome.toUpperCase();
     flipHistory.push(outcome);
     updateFlipHistory();
 
-    if (outcome === selectedSide) {
+    const isWin = outcome === selectedSide;
+    if (isWin) {
         money += bet;
         resultDisplay.textContent = "WIN  +$" + bet.toFixed(2);
     } else {
@@ -334,27 +875,116 @@ function flipCoin() {
         resultDisplay.textContent = "LOSS  -$" + bet.toFixed(2);
     }
 
+    playSound(isWin ? "win" : "loss");
+    showBetPopup(isWin, bet);
+
     money = Math.round(money * 100) / 100;
     moneyDisplay.textContent = "$" + money.toFixed(2);
+    checkMilestoneProgress(previousMoney, money);
     balanceHistory.push(money);
     drawBalanceChart();
 
     if (money <= 0) {
-        resultDisplay.textContent = "BROKE — reload to restart";
-        betInput.disabled = true;
-        flipButton.disabled = true;
+        resultDisplay.textContent = "";
+        playSound("broke");
     }
+    setBrokeState();
+    return true;
 }
+
+function restartGame() {
+    playSound("restart");
+
+    money = 1.00;
+    selectedSide = "heads";
+    flipHistory = [];
+    balanceHistory = [money];
+    activeBet = "small";
+    lastMilestoneBracket = 0;
+
+    moneyDisplay.textContent = "$1.00";
+    coinDisplay.textContent = "?";
+    resultDisplay.textContent = "";
+
+    updateFlipHistory();
+    selectSide("heads");
+    setActiveBet("small");
+    setBrokeState();
+    updateMilestones();
+    drawBalanceChart();
+
+    betPopLayer.replaceChildren();
+    milestonePopLayer.replaceChildren();
+}
+
+restartButton.addEventListener("click", restartGame);
+
+function placeBet(type) {
+    if (money <= 0) {
+        return;
+    }
+
+    setActiveBet(type);
+    flipCoin(getBetAmount(type));
+}
+
+function repeatActiveBet() {
+    if (document.activeElement === smallBetInput || document.activeElement === largeBetInput) {
+        document.activeElement.blur();
+    }
+    placeBet(activeBet);
+}
+
+Object.entries(betControls).forEach(([type, control]) => {
+    control.addEventListener("click", event => {
+        if (event.target.classList.contains("bet-input")) return;
+        placeBet(type);
+    });
+});
+
+[smallBetInput, largeBetInput].forEach(input => {
+    input.addEventListener("click", event => event.stopPropagation());
+    input.addEventListener("pointerdown", event => event.stopPropagation());
+    input.addEventListener("focus", () => {
+        setActiveBet(input === smallBetInput ? "small" : "large");
+        input.select();
+    });
+    input.addEventListener("blur", () => {
+        const value = parseFloat(input.value);
+        if (isNaN(value) || value <= 0) {
+            input.value = input === smallBetInput ? "0.10" : "0.25";
+        } else {
+            input.value = (Math.round(value * 100) / 100).toFixed(2);
+        }
+    });
+});
+
+document.addEventListener("keydown", event => {
+    if (event.metaKey || event.ctrlKey || event.altKey) return;
+
+    if (event.key === "Tab") {
+        event.preventDefault();
+        if (document.activeElement === smallBetInput || document.activeElement === largeBetInput) {
+            document.activeElement.blur();
+        }
+        toggleSide();
+        return;
+    }
+
+    if (event.key === " " || event.key === "Enter") {
+        event.preventDefault();
+        if (money <= 0) {
+            restartGame();
+        } else {
+            repeatActiveBet();
+        }
+    }
+});
 
 window.addEventListener("resize", drawBalanceChart);
 drawBalanceChart();
-
-betInput.addEventListener("keydown", function(event) {
-    if (event.key === "Enter") {
-        event.preventDefault();
-        flipCoin();
-    }
-});
+updateMilestones();
+setBrokeState();
 </script>
 </body>
 </html>
