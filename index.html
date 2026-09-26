@@ -18,7 +18,7 @@ body {
     color: white;
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
     min-height: 100vh;
     min-height: 100dvh;
     padding: max(20px, env(safe-area-inset-top))
@@ -32,7 +32,7 @@ body {
     width: 100%;
     max-width: 350px;
 }
-h1 { margin: 0 0 5px; font-size: 28px; }
+h1 { margin: 0 0 16px; font-size: 28px; }
 #money {
     font-size: 42px;
     font-weight: bold;
@@ -41,7 +41,7 @@ h1 { margin: 0 0 5px; font-size: 28px; }
 .balance-panel {
     width: 100%;
     padding: 12px;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
     background: #181818;
     border: 1px solid #333;
     border-radius: 10px;
@@ -84,110 +84,120 @@ h1 { margin: 0 0 5px; font-size: 28px; }
     color: #666;
     font-size: 13px;
 }
-#coin {
-    font-size: clamp(42px, 13vw, 58px);
-    font-weight: bold;
-    margin: 22px 0;
-    min-height: 70px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
 .choice {
     display: flex;
     gap: 10px;
     width: 100%;
-    margin-bottom: 14px;
+    margin: 0 0 10px;
 }
 button {
     font-family: inherit;
     font-size: 18px;
     font-weight: bold;
     min-height: 52px;
-    border: 2px solid #777;
+    border: 3px solid #777;
     background: #222;
     color: white;
     cursor: pointer;
     border-radius: 8px;
     touch-action: manipulation;
+    transition: transform 80ms ease, border-color 120ms ease, background 120ms ease;
 }
-.choice button { flex: 1; }
+.choice button {
+    flex: 1;
+    min-height: 54px;
+}
+.choice button:active { transform: scale(0.98); }
 button.selected {
-    background: white;
-    color: black;
-    border-color: white;
+    background: #2a2a2a;
+    border-color: #aaa;
 }
 
 .bet-row {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    gap: 8px;
+    gap: 10px;
     width: 100%;
+    align-items: stretch;
 }
 .bet-control {
     min-width: 0;
-    min-height: 68px;
-    padding: 8px 7px 7px;
-    border: 2px solid #777;
-    background: #222;
+    min-height: 132px;
+    border: 3px solid #777;
+    background: #151515;
     color: white;
     border-radius: 8px;
-    cursor: pointer;
+    overflow: hidden;
     touch-action: manipulation;
     user-select: none;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    display: grid;
+    grid-template-rows: 1fr 48px;
     transition: transform 80ms ease, border-color 120ms ease, background 120ms ease;
 }
-.bet-control:active { transform: scale(0.97); }
-.bet-control.active {
-    border-color: white;
-    background: #2b2b2b;
-}
+.bet-control.active { border-color: #8c8c8c; }
 .bet-control.disabled {
     opacity: 0.45;
     cursor: default;
 }
-.bet-label {
-    font-size: 11px;
-    font-weight: bold;
-    letter-spacing: 0.06em;
-    color: #aaa;
-    line-height: 1;
-    margin-bottom: 5px;
+.bet-action {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 100%;
+    min-height: 0;
+    padding: 12px 6px;
+    border: 0;
+    border-radius: 0;
+    background: #1f1f1f;
+    color: white;
+    font: inherit;
+    font-size: 16px;
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: 0.01em;
+    cursor: pointer;
 }
+.bet-action:active { transform: none; background: #2a2a2a; }
 .bet-input-wrap {
     width: 100%;
+    min-width: 0;
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 1px;
-    font-size: 20px;
+    padding: 6px 5px 5px;
+    border-top: 3px solid #777;
+    background: #3c3c3c;
+    cursor: text;
+    font-size: 17px;
     font-weight: bold;
     line-height: 1;
 }
+.bet-control.active .bet-input-wrap { border-top-color: #8c8c8c; }
+.bet-value {
+    display: inline-flex;
+    align-items: center;
+    border-bottom: 2px solid #aaa;
+}
+.bet-input-wrap:focus-within .bet-value { border-bottom-color: white; }
 .bet-dollar {
     color: white;
     pointer-events: none;
 }
 .bet-input {
-    width: 58px;
+    width: 40px;
     min-width: 0;
     margin: 0;
     padding: 0;
-    height: 28px;
+    height: 27px;
     border: 0;
-    border-bottom: 1px solid #666;
+    border-bottom: 0;
     border-radius: 0;
     outline: none;
     background: transparent;
     color: white;
     font: inherit;
-    font-size: 20px;
+    font-size: 17px;
     font-weight: bold;
-    text-align: center;
+    text-align: left;
     -moz-appearance: textfield;
 }
 .bet-input::-webkit-outer-spin-button,
@@ -195,37 +205,32 @@ button.selected {
     -webkit-appearance: none;
     margin: 0;
 }
-.bet-input:focus {
-    border-bottom-color: white;
+.all-in-control {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 132px;
+    padding: 10px;
+    border-color: #5849ff;
+    background: #262047;
+    cursor: pointer;
 }
-.all-in-value {
-    font-size: 20px;
-    font-weight: bold;
-    line-height: 28px;
-}
-#result {
-    min-height: 30px;
-    margin-top: 20px;
-    font-size: 20px;
-    font-weight: bold;
-}
-.hint {
-    margin-top: 10px;
-    color: #888;
-    font-size: 13px;
-    line-height: 1.35;
+.all-in-control.active,
+.all-in-control:hover { border-color: #6b5cff; }
+.all-in-control:active { transform: scale(0.98); }
+.all-in-label {
+    font-size: 17px;
+    font-weight: 800;
+    line-height: 1.18;
 }
 
 .milestone-row {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    gap: 14px;
-    width: min(520px, calc(100vw - 40px));
-    margin: 6px 0 12px;
-    position: relative;
-    left: 50%;
-    transform: translateX(-50%);
+    gap: 12px;
+    width: 100%;
+    margin: 6px 0 18px;
 }
 
 .milestone-bound {
@@ -404,14 +409,27 @@ button.selected {
     position: absolute;
     left: calc(50% + var(--x));
     top: var(--y);
-    font-size: clamp(34px, 10vw, 50px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
     font-weight: 900;
     letter-spacing: -0.03em;
     white-space: nowrap;
+    text-align: center;
     opacity: 0;
     transform: translate(-50%, 4px) scale(0.72);
     animation: bet-pop 720ms cubic-bezier(.16,.88,.28,1) forwards;
     will-change: transform, opacity;
+}
+.bet-pop-result {
+    font-size: clamp(18px, 5.2vw, 25px);
+    line-height: 1;
+    letter-spacing: 0.04em;
+}
+.bet-pop-amount {
+    font-size: clamp(34px, 10vw, 50px);
+    line-height: 1.02;
 }
 .bet-pop.win {
     color: #42e887;
@@ -453,21 +471,21 @@ button.selected {
 }
 @media (max-width: 360px) {
     .bet-row { gap: 6px; }
-    .bet-control { padding-left: 5px; padding-right: 5px; }
-    .bet-input, .bet-input-wrap, .all-in-value { font-size: 18px; }
-    .bet-input { width: 52px; }
+    .bet-action { font-size: 14px; padding-left: 4px; padding-right: 4px; }
+    .bet-input, .bet-input-wrap { font-size: 16px; }
+    .bet-input { width: 38px; }
+    .all-in-label { font-size: 15px; }
 }
 @media (max-height: 740px) {
     body { padding-top: 12px; padding-bottom: 12px; }
-    #money { margin-top: 10px; }
     #balanceChart { height: 95px; }
-    #coin { margin: 12px 0; min-height: 55px; }
-    #result { margin-top: 12px; }
+    .balance-panel { margin-bottom: 10px; }
+    .bet-control, .all-in-control { min-height: 116px; }
+    .bet-control { grid-template-rows: 1fr 44px; }
 }
 @media (max-width: 430px) {
     .milestone-row {
-        width: calc(100vw - 32px);
-        max-width: 390px;
+        width: 100%;
         gap: 9px;
     }
     .milestone-bound {
@@ -508,38 +526,36 @@ button.selected {
         </div>
     </div>
 
-    <div id="coin">?</div>
-
     <div class="choice">
-        <button id="heads" class="selected" onclick="selectSide('heads', true)">HEADS</button>
-        <button id="tails" onclick="selectSide('tails', true)">TAILS</button>
+        <button id="heads" class="selected" type="button" onclick="selectSide('heads', true)">HEADS</button>
+        <button id="tails" type="button" onclick="selectSide('tails', true)">TAILS</button>
     </div>
 
     <div class="bet-row" aria-label="Bet controls">
         <div id="smallBetControl" class="bet-control active" data-bet="small">
-            <div class="bet-label">SMALL</div>
-            <div class="bet-input-wrap">
-                <span class="bet-dollar">$</span>
-                <input id="smallBet" class="bet-input" type="number" min="0.01" step="0.01" inputmode="decimal" value="0.10" aria-label="Small bet amount">
-            </div>
+            <button class="bet-action" type="button" data-place-bet="small" aria-label="Place small bet">SMALL<br>BET</button>
+            <label class="bet-input-wrap" for="smallBet">
+                <span class="bet-value">
+                    <span class="bet-dollar">$</span>
+                    <input id="smallBet" class="bet-input" type="number" min="0.01" step="0.01" inputmode="decimal" value="0.10" aria-label="Small bet amount">
+                </span>
+            </label>
         </div>
 
         <div id="largeBetControl" class="bet-control" data-bet="large">
-            <div class="bet-label">LARGE</div>
-            <div class="bet-input-wrap">
-                <span class="bet-dollar">$</span>
-                <input id="largeBet" class="bet-input" type="number" min="0.01" step="0.01" inputmode="decimal" value="0.25" aria-label="Large bet amount">
-            </div>
+            <button class="bet-action" type="button" data-place-bet="large" aria-label="Place large bet">LARGE<br>BET</button>
+            <label class="bet-input-wrap" for="largeBet">
+                <span class="bet-value">
+                    <span class="bet-dollar">$</span>
+                    <input id="largeBet" class="bet-input" type="number" min="0.01" step="0.01" inputmode="decimal" value="0.25" aria-label="Large bet amount">
+                </span>
+            </label>
         </div>
 
-        <div id="allInControl" class="bet-control" data-bet="allin">
-            <div class="bet-label">ALL IN</div>
-            <div class="all-in-value">100%</div>
-        </div>
+        <button id="allInControl" class="bet-control all-in-control" type="button" data-bet="allin" data-place-bet="allin" aria-label="Bet all available money">
+            <span class="all-in-label">ALL<br>IN</span>
+        </button>
     </div>
-
-    <div id="result"></div>
-    <div class="hint">Tap a bet to flip • Desktop: TAB switches side, SPACE / ENTER repeats your active bet</div>
 </div>
 
 <div id="bustOverlay" class="bust-overlay" aria-hidden="true">
@@ -621,8 +637,6 @@ function playSound(name) {
 }
 
 const moneyDisplay = document.getElementById("money");
-const coinDisplay = document.getElementById("coin");
-const resultDisplay = document.getElementById("result");
 const flipHistoryDisplay = document.getElementById("flipHistory");
 const balanceChart = document.getElementById("balanceChart");
 const smallBetInput = document.getElementById("smallBet");
@@ -821,10 +835,10 @@ function getBetAmount(type) {
     return parseFloat(input.value);
 }
 
-function showBetPopup(isWin, amount) {
+function showBetPopup(outcome, isWin, amount) {
     const popup = document.createElement("div");
     popup.className = "bet-pop " + (isWin ? "win" : "loss");
-    popup.textContent = (isWin ? "+$" : "-$") + amount.toFixed(2);
+    popup.innerHTML = `<span class="bet-pop-result">${outcome.toUpperCase()}</span><span class="bet-pop-amount">${isWin ? "+$" : "-$"}${amount.toFixed(2)}</span>`;
 
     const chartRect = balanceChart.getBoundingClientRect();
     const verticalJitter = (Math.random() * 0.18 - 0.09) * chartRect.height;
@@ -848,35 +862,30 @@ function setBrokeState() {
 
 function flipCoin(bet) {
     if (isNaN(bet) || bet <= 0) {
-        resultDisplay.textContent = "Enter a valid bet.";
         return false;
     }
 
     bet = Math.round(bet * 100) / 100;
 
     if (bet > money) {
-        resultDisplay.textContent = "You don't have enough money.";
         return false;
     }
 
     const previousMoney = money;
 
     const outcome = Math.random() < 0.5 ? "heads" : "tails";
-    coinDisplay.textContent = outcome.toUpperCase();
     flipHistory.push(outcome);
     updateFlipHistory();
 
     const isWin = outcome === selectedSide;
     if (isWin) {
         money += bet;
-        resultDisplay.textContent = "WIN  +$" + bet.toFixed(2);
     } else {
         money -= bet;
-        resultDisplay.textContent = "LOSS  -$" + bet.toFixed(2);
     }
 
     playSound(isWin ? "win" : "loss");
-    showBetPopup(isWin, bet);
+    showBetPopup(outcome, isWin, bet);
 
     money = Math.round(money * 100) / 100;
     moneyDisplay.textContent = "$" + money.toFixed(2);
@@ -885,7 +894,6 @@ function flipCoin(bet) {
     drawBalanceChart();
 
     if (money <= 0) {
-        resultDisplay.textContent = "";
         playSound("broke");
     }
     setBrokeState();
@@ -903,8 +911,6 @@ function restartGame() {
     lastMilestoneBracket = 0;
 
     moneyDisplay.textContent = "$1.00";
-    coinDisplay.textContent = "?";
-    resultDisplay.textContent = "";
 
     updateFlipHistory();
     selectSide("heads");
@@ -935,16 +941,24 @@ function repeatActiveBet() {
     placeBet(activeBet);
 }
 
-Object.entries(betControls).forEach(([type, control]) => {
-    control.addEventListener("click", event => {
-        if (event.target.classList.contains("bet-input")) return;
-        placeBet(type);
+document.querySelectorAll("[data-place-bet]").forEach(button => {
+    button.addEventListener("click", event => {
+        event.stopPropagation();
+        placeBet(button.dataset.placeBet);
+    });
+});
+
+document.querySelectorAll(".bet-input-wrap").forEach(wrap => {
+    wrap.addEventListener("click", () => {
+        const input = wrap.querySelector(".bet-input");
+        if (input) {
+            input.focus();
+            input.select();
+        }
     });
 });
 
 [smallBetInput, largeBetInput].forEach(input => {
-    input.addEventListener("click", event => event.stopPropagation());
-    input.addEventListener("pointerdown", event => event.stopPropagation());
     input.addEventListener("focus", () => {
         setActiveBet(input === smallBetInput ? "small" : "large");
         input.select();
