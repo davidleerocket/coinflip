@@ -497,6 +497,100 @@ button.selected {
     }
 }
 
+
+/* ===== LEADERBOARD TICKER =====
+   Fixed financial-news-style tape across the bottom of the screen.
+   The visible entries are generated from LEADERBOARD_DATA in the script below.
+*/
+.leaderboard-ticker {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10030;
+    overflow: hidden;
+    background: #f4f4f4;
+    color: #090909;
+    border-top: 1px solid #d7d7d7;
+    padding-bottom: env(safe-area-inset-bottom);
+    box-shadow: 0 -1px 0 rgba(255,255,255,0.08);
+}
+
+.leaderboard-ticker-viewport {
+    width: 100%;
+    height: 58px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+}
+
+.leaderboard-ticker-track {
+    display: flex;
+    align-items: center;
+    width: max-content;
+    will-change: transform;
+    animation: leaderboard-scroll 42s linear infinite;
+}
+
+.leaderboard-ticker-group {
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+    padding-right: 56px;
+}
+
+.leaderboard-entry {
+    display: inline-flex;
+    align-items: center;
+    flex: 0 0 auto;
+    gap: 13px;
+    margin-right: 56px;
+    white-space: nowrap;
+    font-size: clamp(20px, 2vw, 28px);
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.025em;
+}
+
+.leaderboard-up {
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-bottom: 18px solid #159653;
+    flex: 0 0 auto;
+    transform: translateY(-1px);
+}
+
+@keyframes leaderboard-scroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+}
+
+/* Reserve room so the fixed ticker never covers the game controls. */
+body {
+    padding-bottom: calc(max(20px, env(safe-area-inset-bottom)) + 64px);
+}
+
+@media (max-width: 600px) {
+    .leaderboard-ticker-viewport { height: 48px; }
+    .leaderboard-entry {
+        gap: 9px;
+        margin-right: 34px;
+        font-size: 18px;
+    }
+    .leaderboard-ticker-group { padding-right: 34px; }
+    .leaderboard-up {
+        border-left-width: 8px;
+        border-right-width: 8px;
+        border-bottom-width: 14px;
+    }
+    .leaderboard-ticker-track { animation-duration: 38s; }
+    body {
+        padding-bottom: calc(max(20px, env(safe-area-inset-bottom)) + 54px);
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .bet-pop { animation-duration: 300ms; }
     .bet-pop::before { display: none; }
@@ -558,6 +652,13 @@ button.selected {
     </div>
 </div>
 
+
+<div class="leaderboard-ticker" aria-label="Top 10 leaderboard">
+    <div class="leaderboard-ticker-viewport">
+        <div id="leaderboardTickerTrack" class="leaderboard-ticker-track"></div>
+    </div>
+</div>
+
 <div id="bustOverlay" class="bust-overlay" aria-hidden="true">
     <div class="bust-card" role="dialog" aria-modal="true" aria-labelledby="bustTitle">
         <div id="bustTitle" class="bust-title">BROKE</div>
@@ -576,6 +677,24 @@ let flipHistory = [];
 let balanceHistory = [money];
 let activeBet = "small";
 let lastMilestoneBracket = 0;
+
+/* ===== DEFAULT LEADERBOARD DATA =====
+   Edit these names/scores whenever you want. Rankings are calculated automatically:
+   the highest score is #1, and the ticker is displayed from the lowest score to highest.
+*/
+const LEADERBOARD_DATA = [
+    { name: "PennyFlip", score: 1240 },
+    { name: "LuckyMint", score: 1875 },
+    { name: "DoubleDown", score: 2460 },
+    { name: "HeadsUp", score: 3180 },
+    { name: "GreenCandle", score: 4425 },
+    { name: "RiskTaker", score: 5680 },
+    { name: "FlipKing", score: 7350 },
+    { name: "GregGG", score: 9700 },
+    { name: "JohnPork", score: 11200 },
+    { name: "CoinMaster3000", score: 14500 }
+];
+
 
 /*
 CUSTOM SOUND EFFECTS
@@ -652,6 +771,56 @@ const betControls = {
     large: document.getElementById("largeBetControl"),
     allin: document.getElementById("allInControl")
 };
+
+
+function formatLeaderboardScore(value) {
+    if (value >= 1000000) {
+        const millions = value / 1000000;
+        return millions.toLocaleString("en-US", { maximumFractionDigits: millions >= 10 ? 1 : 2 }) + "m";
+    }
+    if (value >= 1000) {
+        const thousands = value / 1000;
+        return thousands.toLocaleString("en-US", { maximumFractionDigits: thousands >= 10 ? 1 : 2 }) + "k";
+    }
+    return value.toLocaleString("en-US", { maximumFractionDigits: 2 });
+}
+
+function renderLeaderboardTicker() {
+    const track = document.getElementById("leaderboardTickerTrack");
+    if (!track) return;
+
+    const sorted = [...LEADERBOARD_DATA]
+        .filter(entry => entry && typeof entry.name === "string" && Number.isFinite(Number(entry.score)))
+        .map(entry => ({ name: entry.name.trim() || "Anonymous", score: Number(entry.score) }))
+        .sort((a, b) => a.score - b.score)
+        .slice(-10);
+
+    const total = sorted.length;
+    const makeGroup = () => {
+        const group = document.createElement("div");
+        group.className = "leaderboard-ticker-group";
+
+        sorted.forEach((entry, index) => {
+            const place = total - index;
+            const item = document.createElement("div");
+            item.className = "leaderboard-entry";
+
+            const label = document.createElement("span");
+            label.textContent = `${entry.name} [#${place}] @ $${formatLeaderboardScore(entry.score)}`;
+
+            const triangle = document.createElement("span");
+            triangle.className = "leaderboard-up";
+            triangle.setAttribute("aria-hidden", "true");
+
+            item.append(label, triangle);
+            group.appendChild(item);
+        });
+
+        return group;
+    };
+
+    track.replaceChildren(makeGroup(), makeGroup());
+}
 
 function formatMilestone(value) {
     return "$" + value.toLocaleString("en-US", { maximumFractionDigits: 0 });
@@ -996,6 +1165,7 @@ document.addEventListener("keydown", event => {
 });
 
 window.addEventListener("resize", drawBalanceChart);
+renderLeaderboardTicker();
 drawBalanceChart();
 updateMilestones();
 setBrokeState();
