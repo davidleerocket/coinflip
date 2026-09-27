@@ -568,6 +568,73 @@ button.selected {
 }
 
 
+/* ===== LIVE LEADERBOARD QUALIFIER ===== */
+.leaderboard-qualifier {
+    display: none;
+    margin: 14px 0 4px;
+    padding-top: 14px;
+    border-top: 1px solid #3d3d3d;
+}
+
+.leaderboard-qualifier.show { display: block; }
+
+.leaderboard-qualifier-title {
+    color: #42e887;
+    font-size: 24px;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+}
+
+.leaderboard-score-message {
+    margin: 5px 0 11px;
+    color: #cfcfcf;
+    font-size: 13px;
+    line-height: 1.35;
+}
+
+#leaderboardName {
+    width: 100%;
+    height: 46px;
+    padding: 0 12px;
+    border: 2px solid #666;
+    border-radius: 8px;
+    outline: none;
+    background: #101010;
+    color: white;
+    font: inherit;
+    font-size: 16px;
+    font-weight: 700;
+    text-align: center;
+}
+
+#leaderboardName:focus { border-color: #42e887; }
+
+#submitLeaderboardButton {
+    width: 100%;
+    min-height: 48px;
+    margin-top: 8px;
+    border-color: #178c4b;
+    background: #123220;
+    font-size: 15px;
+}
+
+#submitLeaderboardButton:disabled {
+    opacity: 0.55;
+    cursor: default;
+}
+
+.leaderboard-submit-status {
+    min-height: 17px;
+    margin-top: 7px;
+    color: #aaa;
+    font-size: 12px;
+    line-height: 1.3;
+}
+
+.leaderboard-submit-status.success { color: #42e887; }
+.leaderboard-submit-status.error { color: #ff7777; }
+
+
 /* ===== LEADERBOARD TICKER =====
    Fixed financial-news-style tape across the bottom of the screen.
    The visible entries are generated from LEADERBOARD_DATA in the script below.
@@ -734,7 +801,14 @@ body {
 <div id="bustOverlay" class="bust-overlay" aria-hidden="true">
     <div class="bust-card" role="dialog" aria-modal="true" aria-labelledby="bustTitle">
         <div id="bustTitle" class="bust-title">BROKE</div>
-        <div class="bust-hint">Tap restart • Desktop: SPACE / ENTER</div>
+        <div id="bustHint" class="bust-hint">Tap restart • Desktop: SPACE / ENTER</div>
+        <div id="leaderboardQualifier" class="leaderboard-qualifier" aria-hidden="true">
+            <div id="leaderboardQualifierTitle" class="leaderboard-qualifier-title">TOP 10!</div>
+            <div id="leaderboardScoreMessage" class="leaderboard-score-message"></div>
+            <input id="leaderboardName" type="text" maxlength="20" autocomplete="nickname" spellcheck="false" placeholder="Enter your name" aria-label="Leaderboard name">
+            <button id="submitLeaderboardButton" type="button">SUBMIT SCORE</button>
+            <div id="leaderboardSubmitStatus" class="leaderboard-submit-status" aria-live="polite"></div>
+        </div>
         <button id="restartButton" type="button">RESTART</button>
     </div>
 </div>
@@ -749,12 +823,18 @@ let flipHistory = [];
 let balanceHistory = [money];
 let activeBet = "small";
 let lastMilestoneBracket = 0;
+let runHighScore = money;
+let leaderboardSubmittedThisRun = false;
+let runToken = 0;
 
-/* ===== DEFAULT LEADERBOARD DATA =====
-   Edit these names/scores whenever you want. Rankings are calculated automatically:
-   the highest score is #1, and the ticker is displayed from the lowest score to highest.
+/* ===== LIVE LEADERBOARD =====
+   The game is still hosted statically. These requests go to the Cloudflare Worker,
+   which reads/writes the D1 leaderboard database. The default list remains as a
+   visual fallback if the API is temporarily unavailable.
 */
-const LEADERBOARD_DATA = [
+const LEADERBOARD_API_URL = "https://coinbet-leaderboard-api.piearesquared03.workers.dev/leaderboard";
+
+const DEFAULT_LEADERBOARD_DATA = [
     { name: "PennyFlip", score: 1240 },
     { name: "LuckyMint", score: 1875 },
     { name: "DoubleDown", score: 2460 },
@@ -766,6 +846,9 @@ const LEADERBOARD_DATA = [
     { name: "JohnPork", score: 11200 },
     { name: "CoinMaster3000", score: 14500 }
 ];
+
+let leaderboardData = [...DEFAULT_LEADERBOARD_DATA];
+let leaderboardOnline = false;
 
 
 /*
@@ -837,7 +920,14 @@ const milestonePopLayer = document.getElementById("milestonePopLayer");
 const milestoneLow = document.getElementById("milestoneLow");
 const milestoneHigh = document.getElementById("milestoneHigh");
 const bustOverlay = document.getElementById("bustOverlay");
+const bustHint = document.getElementById("bustHint");
 const restartButton = document.getElementById("restartButton");
+const leaderboardQualifier = document.getElementById("leaderboardQualifier");
+const leaderboardQualifierTitle = document.getElementById("leaderboardQualifierTitle");
+const leaderboardScoreMessage = document.getElementById("leaderboardScoreMessage");
+const leaderboardNameInput = document.getElementById("leaderboardName");
+const submitLeaderboardButton = document.getElementById("submitLeaderboardButton");
+const leaderboardSubmitStatus = document.getElementById("leaderboardSubmitStatus");
 const moneyStreamerLayer = document.getElementById("moneyStreamerLayer");
 const betControls = {
     small: document.getElementById("smallBetControl"),
@@ -858,11 +948,22 @@ function formatLeaderboardScore(value) {
     return value.toLocaleString("en-US", { maximumFractionDigits: 2 });
 }
 
-function renderLeaderboardTicker() {
+function normalizeLeaderboardRows(rows) {
+    return (Array.isArray(rows) ? rows : [])
+        .map(entry => ({
+            name: typeof entry?.name === "string" ? entry.name.trim() : "",
+            score: Number(entry?.score_cents) / 100
+        }))
+        .filter(entry => entry.name && Number.isFinite(entry.score) && entry.score >= 0)
+        .sort((a, b) => a.score - b.score)
+        .slice(-10);
+}
+
+function renderLeaderboardTicker(data = leaderboardData) {
     const track = document.getElementById("leaderboardTickerTrack");
     if (!track) return;
 
-    const sorted = [...LEADERBOARD_DATA]
+    const sorted = [...data]
         .filter(entry => entry && typeof entry.name === "string" && Number.isFinite(Number(entry.score)))
         .map(entry => ({ name: entry.name.trim() || "Anonymous", score: Number(entry.score) }))
         .sort((a, b) => a.score - b.score)
@@ -895,6 +996,146 @@ function renderLeaderboardTicker() {
     track.replaceChildren(makeGroup(), makeGroup());
 }
 
+async function loadLeaderboard() {
+    try {
+        const response = await fetch(LEADERBOARD_API_URL, {
+            method: "GET",
+            cache: "no-store"
+        });
+
+        if (!response.ok) throw new Error(`Leaderboard request failed (${response.status})`);
+
+        const rows = await response.json();
+        const normalized = normalizeLeaderboardRows(rows);
+        if (normalized.length === 0) throw new Error("Leaderboard response was empty");
+
+        leaderboardData = normalized;
+        leaderboardOnline = true;
+        renderLeaderboardTicker();
+        return true;
+    } catch (error) {
+        console.warn("Leaderboard unavailable; using fallback data.", error);
+        leaderboardOnline = false;
+        if (!leaderboardData.length) leaderboardData = [...DEFAULT_LEADERBOARD_DATA];
+        renderLeaderboardTicker();
+        return false;
+    }
+}
+
+function getLeaderboardCutoff() {
+    if (leaderboardData.length < 10) return -Infinity;
+    return Math.min(...leaderboardData.map(entry => Number(entry.score)).filter(Number.isFinite));
+}
+
+function runQualifiesForLeaderboard() {
+    return leaderboardOnline && !leaderboardSubmittedThisRun && runHighScore > getLeaderboardCutoff();
+}
+
+function hideLeaderboardQualifier() {
+    leaderboardQualifier.classList.remove("show");
+    leaderboardQualifier.setAttribute("aria-hidden", "true");
+    leaderboardQualifierTitle.textContent = "TOP 10!";
+    leaderboardScoreMessage.textContent = "";
+    leaderboardSubmitStatus.textContent = "";
+    leaderboardSubmitStatus.className = "leaderboard-submit-status";
+    leaderboardNameInput.value = "";
+    leaderboardNameInput.disabled = false;
+    submitLeaderboardButton.disabled = false;
+    submitLeaderboardButton.textContent = "SUBMIT SCORE";
+    bustHint.textContent = "Tap restart • Desktop: SPACE / ENTER";
+}
+
+function showLeaderboardQualifier() {
+    leaderboardQualifier.classList.add("show");
+    leaderboardQualifier.setAttribute("aria-hidden", "false");
+    leaderboardQualifierTitle.textContent = "TOP 10!";
+    leaderboardScoreMessage.textContent = `Run high score: $${runHighScore.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    bustHint.textContent = "You made the leaderboard. Enter a name below.";
+
+    setTimeout(() => {
+        if (money <= 0 && leaderboardQualifier.classList.contains("show")) {
+            leaderboardNameInput.focus();
+        }
+    }, 80);
+}
+
+async function checkLeaderboardQualificationAtRunEnd() {
+    const token = runToken;
+
+    // Refresh once at the end of the run so qualification uses the latest cutoff.
+    await loadLeaderboard();
+
+    if (token !== runToken || money > 0) return;
+
+    if (runQualifiesForLeaderboard()) {
+        showLeaderboardQualifier();
+    } else {
+        hideLeaderboardQualifier();
+    }
+}
+
+async function submitLeaderboardScore() {
+    if (leaderboardSubmittedThisRun || money > 0) return;
+
+    const name = leaderboardNameInput.value.trim().slice(0, 20);
+    if (!name) {
+        leaderboardSubmitStatus.textContent = "Enter a name first.";
+        leaderboardSubmitStatus.className = "leaderboard-submit-status error";
+        leaderboardNameInput.focus();
+        return;
+    }
+
+    const scoreCents = Math.round(runHighScore * 100);
+    submitLeaderboardButton.disabled = true;
+    leaderboardNameInput.disabled = true;
+    leaderboardSubmitStatus.textContent = "Submitting...";
+    leaderboardSubmitStatus.className = "leaderboard-submit-status";
+
+    try {
+        const response = await fetch(LEADERBOARD_API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, score_cents: scoreCents })
+        });
+
+        const payload = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+            if (response.status === 409) {
+                await loadLeaderboard();
+                leaderboardSubmitStatus.textContent = "The cutoff changed and this score no longer qualifies.";
+            } else {
+                leaderboardSubmitStatus.textContent = payload.error || "Could not submit score. Try again.";
+            }
+            leaderboardSubmitStatus.className = "leaderboard-submit-status error";
+            submitLeaderboardButton.disabled = false;
+            leaderboardNameInput.disabled = false;
+            return;
+        }
+
+        leaderboardSubmittedThisRun = true;
+        leaderboardOnline = true;
+
+        const normalized = normalizeLeaderboardRows(payload.leaderboard);
+        if (normalized.length) leaderboardData = normalized;
+        else await loadLeaderboard();
+
+        renderLeaderboardTicker();
+        leaderboardQualifierTitle.textContent = "SCORE POSTED!";
+        leaderboardSubmitStatus.textContent = "You're on the board.";
+        leaderboardSubmitStatus.className = "leaderboard-submit-status success";
+        submitLeaderboardButton.textContent = "SUBMITTED";
+        submitLeaderboardButton.disabled = true;
+        leaderboardNameInput.disabled = true;
+        bustHint.textContent = "Score saved. Tap restart when you're ready.";
+    } catch (error) {
+        console.error("Leaderboard submission failed.", error);
+        leaderboardSubmitStatus.textContent = "Connection error. Try again.";
+        leaderboardSubmitStatus.className = "leaderboard-submit-status error";
+        submitLeaderboardButton.disabled = false;
+        leaderboardNameInput.disabled = false;
+    }
+}
 
 /* ===== MONEY BUILDUP BACKGROUND EFFECTS =====
    One streamer is active at $1.50, a second at $2.25, then another at every
@@ -1183,6 +1424,7 @@ function flipCoin(bet) {
     showBetPopup(outcome, isWin, bet);
 
     money = Math.round(money * 100) / 100;
+    runHighScore = Math.max(runHighScore, money);
     moneyDisplay.textContent = "$" + money.toFixed(2);
     updateMoneyStreamers(money);
     checkMilestoneProgress(previousMoney, money);
@@ -1191,6 +1433,7 @@ function flipCoin(bet) {
 
     if (money <= 0) {
         playSound("broke");
+        checkLeaderboardQualificationAtRunEnd();
     }
     setBrokeState();
     return true;
@@ -1205,6 +1448,10 @@ function restartGame() {
     balanceHistory = [money];
     activeBet = "small";
     lastMilestoneBracket = 0;
+    runHighScore = money;
+    leaderboardSubmittedThisRun = false;
+    runToken += 1;
+    hideLeaderboardQualifier();
 
     moneyDisplay.textContent = "$1.00";
     updateMoneyStreamers(money);
@@ -1221,6 +1468,13 @@ function restartGame() {
 }
 
 restartButton.addEventListener("click", restartGame);
+submitLeaderboardButton.addEventListener("click", submitLeaderboardScore);
+leaderboardNameInput.addEventListener("keydown", event => {
+    if (event.key === "Enter") {
+        event.preventDefault();
+        submitLeaderboardScore();
+    }
+});
 
 function placeBet(type) {
     if (money <= 0) {
@@ -1272,6 +1526,7 @@ document.querySelectorAll(".bet-input-wrap").forEach(wrap => {
 
 document.addEventListener("keydown", event => {
     if (event.metaKey || event.ctrlKey || event.altKey) return;
+    if (leaderboardQualifier.contains(document.activeElement)) return;
 
     if (event.key === "Tab") {
         event.preventDefault();
@@ -1297,6 +1552,7 @@ window.addEventListener("resize", () => {
     repositionMoneyStreamers();
 });
 renderLeaderboardTicker();
+loadLeaderboard();
 updateMoneyStreamers();
 drawBalanceChart();
 updateMilestones();
