@@ -509,6 +509,65 @@ button.selected {
 }
 
 
+/* ===== MONEY BUILDUP BACKGROUND EFFECTS =====
+   Dollar-sign streamers appear as the balance crosses successive 50% thresholds.
+   This layer sits behind the game UI and never crosses the center game column.
+*/
+.money-streamer-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.game {
+    position: relative;
+    z-index: 1;
+}
+
+.money-streamer {
+    --tail-height: 180px;
+    --tail-opacity: 0.34;
+    position: absolute;
+    top: 100vh;
+    width: 30px;
+    height: calc(var(--tail-height) + 38px);
+    color: #178c4b;
+    font-size: 30px;
+    opacity: 0.15;
+    font-weight: 900;
+    line-height: 1;
+    text-align: center;
+    will-change: transform;
+    animation-name: money-stream-rise;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+.money-streamer::after {
+    content: "";
+    position: absolute;
+    top: 22px;
+    left: 50%;
+    width: 18px;
+    height: var(--tail-height);
+    transform: translateX(-50%);
+    background: linear-gradient(
+        to bottom,
+        rgba(23, 140, 75, var(--tail-opacity)) 0%,
+        rgba(23, 140, 75, 0.14) 42%,
+        rgba(23, 140, 75, 0) 100%
+    );
+    z-index: -1;
+}
+
+@keyframes money-stream-rise {
+    from { transform: translate3d(0, 24px, 0); }
+    to   { transform: translate3d(0, calc(-100vh - 300px), 0); }
+}
+
+
 /* ===== LEADERBOARD TICKER =====
    Fixed financial-news-style tape across the bottom of the screen.
    The visible entries are generated from LEADERBOARD_DATA in the script below.
@@ -603,6 +662,7 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+    .money-streamer-layer { display: none; }
     .bet-pop { animation-duration: 300ms; }
     .bet-pop::before { display: none; }
     .milestone-pop { animation-duration: 360ms; }
@@ -611,6 +671,7 @@ body {
 </style>
 </head>
 <body>
+<div id="moneyStreamerLayer" class="money-streamer-layer" aria-hidden="true"></div>
 <div class="game">
     <h1>Coin Bet</h1>
     <div class="milestone-row" aria-label="Balance milestone progress">
@@ -777,6 +838,7 @@ const milestoneLow = document.getElementById("milestoneLow");
 const milestoneHigh = document.getElementById("milestoneHigh");
 const bustOverlay = document.getElementById("bustOverlay");
 const restartButton = document.getElementById("restartButton");
+const moneyStreamerLayer = document.getElementById("moneyStreamerLayer");
 const betControls = {
     small: document.getElementById("smallBetControl"),
     large: document.getElementById("largeBetControl"),
@@ -831,6 +893,79 @@ function renderLeaderboardTicker() {
     };
 
     track.replaceChildren(makeGroup(), makeGroup());
+}
+
+
+/* ===== MONEY BUILDUP BACKGROUND EFFECTS =====
+   One streamer is active at $1.50, a second at $2.25, then another at every
+   successive 50% increase (1.50^n). The count drops again as the balance falls.
+*/
+function getMoneyStreamerCount(value) {
+    if (!Number.isFinite(value) || value < 1.5) return 0;
+    return Math.max(0, Math.floor(Math.log(value) / Math.log(1.5) + 1e-10));
+}
+
+function pickMoneyStreamerX(streamer) {
+    const gameRect = document.querySelector(".game").getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const edgePad = 12;
+    const uiGap = 24;
+    const symbolWidth = 30;
+
+    const leftStart = edgePad;
+    const leftEnd = gameRect.left - uiGap - symbolWidth;
+    const rightStart = gameRect.right + uiGap;
+    const rightEnd = viewportWidth - edgePad - symbolWidth;
+
+    const leftWidth = Math.max(0, leftEnd - leftStart);
+    const rightWidth = Math.max(0, rightEnd - rightStart);
+    const totalWidth = leftWidth + rightWidth;
+
+    // On very narrow screens there may be no safe background lane outside the UI.
+    if (totalWidth <= 0) {
+        streamer.style.visibility = "hidden";
+        return;
+    }
+
+    streamer.style.visibility = "visible";
+    const pick = Math.random() * totalWidth;
+    const x = pick < leftWidth
+        ? leftStart + Math.random() * leftWidth
+        : rightStart + Math.random() * rightWidth;
+
+    streamer.style.left = `${x.toFixed(1)}px`;
+    streamer.style.setProperty("--tail-height", `${Math.round(145 + Math.random() * 120)}px`);
+    streamer.style.setProperty("--tail-opacity", (0.27 + Math.random() * 0.16).toFixed(2));
+}
+
+function createMoneyStreamer() {
+    const streamer = document.createElement("div");
+    streamer.className = "money-streamer";
+    streamer.textContent = "$";
+    streamer.style.animationDuration = `${(7.5 + Math.random() * 4.5).toFixed(2)}s`;
+    streamer.style.animationDelay = `${(Math.random() * 1.2).toFixed(2)}s`;
+    pickMoneyStreamerX(streamer);
+
+    // Every completed pass respawns from the bottom at a new random safe x-position.
+    streamer.addEventListener("animationiteration", () => pickMoneyStreamerX(streamer));
+    return streamer;
+}
+
+function updateMoneyStreamers(value = money) {
+    if (!moneyStreamerLayer) return;
+
+    const targetCount = getMoneyStreamerCount(value);
+    while (moneyStreamerLayer.children.length < targetCount) {
+        moneyStreamerLayer.appendChild(createMoneyStreamer());
+    }
+    while (moneyStreamerLayer.children.length > targetCount) {
+        moneyStreamerLayer.lastElementChild.remove();
+    }
+}
+
+function repositionMoneyStreamers() {
+    if (!moneyStreamerLayer) return;
+    [...moneyStreamerLayer.children].forEach(pickMoneyStreamerX);
 }
 
 function formatMilestone(value) {
@@ -1069,6 +1204,7 @@ function flipCoin(bet) {
 
     money = Math.round(money * 100) / 100;
     moneyDisplay.textContent = "$" + money.toFixed(2);
+    updateMoneyStreamers(money);
     checkMilestoneProgress(previousMoney, money);
     balanceHistory.push(money);
     drawBalanceChart();
@@ -1091,6 +1227,7 @@ function restartGame() {
     lastMilestoneBracket = 0;
 
     moneyDisplay.textContent = "$1.00";
+    updateMoneyStreamers(money);
 
     updateFlipHistory();
     selectSide("heads");
@@ -1175,8 +1312,12 @@ document.addEventListener("keydown", event => {
     }
 });
 
-window.addEventListener("resize", drawBalanceChart);
+window.addEventListener("resize", () => {
+    drawBalanceChart();
+    repositionMoneyStreamers();
+});
 renderLeaderboardTicker();
+updateMoneyStreamers();
 drawBalanceChart();
 updateMilestones();
 setBrokeState();
