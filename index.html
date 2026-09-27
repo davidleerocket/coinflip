@@ -906,33 +906,13 @@ function getMoneyStreamerCount(value) {
 }
 
 function pickMoneyStreamerX(streamer) {
-    const gameRect = document.querySelector(".game").getBoundingClientRect();
-    const viewportWidth = window.innerWidth;
     const edgePad = 12;
-    const uiGap = 24;
     const symbolWidth = 30;
+    const availableWidth = Math.max(0, window.innerWidth - (edgePad * 2) - symbolWidth);
 
-    const leftStart = edgePad;
-    const leftEnd = gameRect.left - uiGap - symbolWidth;
-    const rightStart = gameRect.right + uiGap;
-    const rightEnd = viewportWidth - edgePad - symbolWidth;
-
-    const leftWidth = Math.max(0, leftEnd - leftStart);
-    const rightWidth = Math.max(0, rightEnd - rightStart);
-    const totalWidth = leftWidth + rightWidth;
-
-    // On very narrow screens there may be no safe background lane outside the UI.
-    if (totalWidth <= 0) {
-        streamer.style.visibility = "hidden";
-        return;
-    }
+    const x = edgePad + Math.random() * availableWidth;
 
     streamer.style.visibility = "visible";
-    const pick = Math.random() * totalWidth;
-    const x = pick < leftWidth
-        ? leftStart + Math.random() * leftWidth
-        : rightStart + Math.random() * rightWidth;
-
     streamer.style.left = `${x.toFixed(1)}px`;
     streamer.style.setProperty("--tail-height", `${Math.round(145 + Math.random() * 120)}px`);
     streamer.style.setProperty("--tail-opacity", (0.27 + Math.random() * 0.16).toFixed(2));
